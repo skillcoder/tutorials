@@ -1,0 +1,7 @@
+cluster: cluster-name
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+  source:
+    repoURL: 'git@github.com:skillcoder/tutorials'
+    targetRevision: master

@@ -1,0 +1,34 @@
+# ------------- Define app -------------
+{{- $appname := "keda" -}}
+{{- $namespace := "keda" -}}
+{{- $syncWave := "1" -}}
+{{- $project := "keda-project" -}}
+# ------------- Template -------------
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ $appname }}
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  annotations:
+    argocd.argoproj.io/sync-wave: {{ $syncWave }}
+spec:
+  project: {{ $project }}
+  source:
+    repoURL: {{ .Values.spec.source.repoURL }}
+    path: infra-apps/{{ $appname }}/overlays/{{ .Values.cluster }}
+    targetRevision: {{ .Values.spec.source.targetRevision }}
+    # kustomize specific config
+    kustomize:
+      commonAnnotations:
+        argocdAppURL:  https://argocd-{{ .Values.cluster }}.local/applications/argocd/{{ $appname }}
+  destination:
+    namespace: {{ $namespace }}
+    server: {{ .Values.spec.destination.server }}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
